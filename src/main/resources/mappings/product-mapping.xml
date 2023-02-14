@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="productMapper">
+	
+	<!-- 신상품 목록 얻어오기 -->
+	<select id="getNewProductList" resultType="product">
+		SELECT * FROM new_pro_view
+	</select>
+	
+	<!-- 베스트 상품 목록 얻어오기 -->
+	<select id="getBestProductList" resultType="product">
+		SELECT * FROM best_pro_view
+	</select>
+	
+	<!-- 상품번호로 하나의 상품정보 얻어오기 -->
+	<select id="getProduct" resultType="product">
+		SELECT * FROM product WHERE pseq=#{pseq}
+	</select>
+	
+	<!-- 상품 종류별 상품 목록 얻어오기 -->
+	<select id="getProductListByKind" resultType="product">
+		SELECT * FROM product WHERE kind=#{kind} ORDER BY name
+	</select>
+	
+	<!-- 총 상품 목록의 개수 조회 -->
+	<select id="countProductList" resultType="int">
+		SELECT count(*) FROM product WHERE name LIKE '%'||#{name}||'%'
+	</select>
+	
+	<!-- 상품 목록 조회 -->
+	<select id="listProduct" resultType="product">
+		SELECT pseq, regdate, name, price1, price2, useyn, bestyn FROM product
+			WHERE name LIKE '%'||#{name}||'%' ORDER BY name
+	</select>
+	
+	<!-- 페이지별 상품 목록 조회 -->
+	<select id="listProductWithPaging" parameterType="hashMap" resultType="product">
+		<![CDATA[
+		SELECT pseq, regdate, name, price1, price2, useyn, bestyn
+ 		 FROM (SELECT row_number() OVER(ORDER BY name) rn, pseq, regdate, name, price1, price2, useyn, bestyn 
+       			 FROM product WHERE name LIKE '%'||#{name}||'%')
+ 		WHERE rn <= #{criteria.pageNum} * #{criteria.rowsPerPage}
+ 		    AND rn > (#{criteria.pageNum}-1) * #{criteria.rowsPerPage}
+ 		 ]]>
+	</select>
+	
+	<!-- 상품 추가 -->
+	<insert id="insertProduct">
+		INSERT INTO product(pseq, kind, name, price1, price2, price3, content, image)
+			 VALUES(product_seq.NEXTVAL, #{kind}, #{name}, #{price1}, #{price2},
+			 		#{price3}, #{content}, #{image})
+	</insert>
+	
+	<!-- 상품 수정 -->
+	<update id="updateProduct">
+		UPDATE product SET kind=#{kind}, useyn=#{useyn}, name=#{name}, 
+			price1=#{price1}, price2=#{price2}, price3=#{price3},
+			content=#{content}, image=#{image}, bestyn=#{bestyn} WHERE pseq=#{pseq} 
+	</update>
+</mapper>
+
+
+
+
+
